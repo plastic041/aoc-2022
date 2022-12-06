@@ -1,43 +1,57 @@
-/// your shapes
-/// X: rock, Y: paper, Z: scissors
-///
-/// opponent shapes
-/// A: rock, B: paper, C: scissors
-///
-/// match scores
-/// draw: 3, win: 6, lose: 0
-pub fn rps_score(opponent: &str, you: &str) -> Option<i32> {
-    let shape_score = match you {
-        "X" => 1,
-        "Y" => 2,
-        "Z" => 3,
-        _ => panic!("Invalid shape"),
-    };
-
-    let match_score = match you {
-        // rock
-        "X" => match opponent {
-            "A" => 3,
-            "B" => 0,
-            "C" => 6,
-            _ => panic!("Invalid shape"),
-        },
-        // paper
-        "Y" => match opponent {
-            "A" => 6,
-            "B" => 3,
-            "C" => 0,
-            _ => panic!("Invalid shape"),
-        },
-        // scissors
-        "Z" => match opponent {
-            "A" => 0,
-            "B" => 6,
-            "C" => 3,
-            _ => panic!("Invalid shape"),
-        },
-        _ => panic!("Invalid shape"),
-    };
-
-    Some(shape_score + match_score)
+pub fn alphabet_score(character: char) -> i32 {
+    match character {
+        'a' => 1,
+        'b' => 2,
+        'c' => 3,
+        'd' => 4,
+        'e' => 5,
+        'f' => 6,
+        'g' => 7,
+        'h' => 8,
+        'i' => 9,
+        'j' => 10,
+        'k' => 11,
+        'l' => 12,
+        'm' => 13,
+        'n' => 14,
+        'o' => 15,
+        'p' => 16,
+        'q' => 17,
+        'r' => 18,
+        's' => 19,
+        't' => 20,
+        'u' => 21,
+        'v' => 22,
+        'w' => 23,
+        'x' => 24,
+        'y' => 25,
+        'z' => 26,
+        'A' => 27,
+        'B' => 28,
+        'C' => 29,
+        'D' => 30,
+        'E' => 31,
+        'F' => 32,
+        'G' => 33,
+        'H' => 34,
+        'I' => 35,
+        'J' => 36,
+        'K' => 37,
+        'L' => 38,
+        'M' => 39,
+        'N' => 40,
+        'O' => 41,
+        'P' => 42,
+        'Q' => 43,
+        'R' => 44,
+        'S' => 45,
+        'T' => 46,
+        'U' => 47,
+        'V' => 48,
+        'W' => 49,
+        'X' => 50,
+        'Y' => 51,
+        'Z' => 52,
+        _ => panic!("Invalid character"),
+    }
 }

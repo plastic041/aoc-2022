@@ -1,7 +1,42 @@
-use advent_of_code::helpers::rps_score;
-
 pub fn part_one(input: &str) -> Option<i32> {
     let lines = input.lines();
+
+    fn rps_score(opponent: &str, you: &str) -> Option<i32> {
+        let shape_score = match you {
+            "X" => 1,
+            "Y" => 2,
+            "Z" => 3,
+            _ => panic!("Invalid shape"),
+        };
+
+        let match_score = match you {
+            // rock
+            "X" => match opponent {
+                "A" => 3,
+                "B" => 0,
+                "C" => 6,
+                _ => panic!("Invalid shape"),
+            },
+            // paper
+            "Y" => match opponent {
+                "A" => 6,
+                "B" => 3,
+                "C" => 0,
+                _ => panic!("Invalid shape"),
+            },
+            // scissors
+            "Z" => match opponent {
+                "A" => 0,
+                "B" => 6,
+                "C" => 3,
+                _ => panic!("Invalid shape"),
+            },
+            _ => panic!("Invalid shape"),
+        };
+
+        Some(shape_score + match_score)
+    }
+
     let score: i32 = lines
         .map(|line| {
             let mut matches = line.split_whitespace();
