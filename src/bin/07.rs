@@ -88,9 +88,7 @@ pub fn part_one(input: &str) -> Option<i32> {
 
     let dirs = dir.get_dirs();
 
-    println!("dirs: {:#?}", dirs);
     let sizes = dirs.iter().map(|d| d.get_size()).collect::<Vec<i32>>();
-    println!("sizes: {:?}", sizes);
     let max = 100000;
     let sizes_below_max: i32 = sizes.iter().filter(|s| **s < max).sum();
 
