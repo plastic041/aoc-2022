@@ -1,8 +1,3 @@
-use std::{
-    collections::BTreeMap,
-    fmt::{self, Display},
-};
-
 pub fn alphabet_score(character: char) -> i32 {
     match character {
         'a' => 1,
@@ -58,82 +53,5 @@ pub fn alphabet_score(character: char) -> i32 {
         'Y' => 51,
         'Z' => 52,
         _ => panic!("Invalid character"),
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Directory {
-    pub name: String,
-    pub size: i32,
-    pub children: BTreeMap<String, Directory>,
-}
-
-impl Directory {
-    pub fn new(name: String, size: i32) -> Directory {
-        Directory {
-            name,
-            size,
-            children: BTreeMap::new(),
-        }
-    }
-
-    pub fn add_child(&mut self, file_name: String, child: Directory) {
-        self.children.insert(file_name, child);
-    }
-
-    pub fn get_size(&self) -> i32 {
-        let mut size = self.size;
-        for child in &self.children {
-            size += child.1.get_size();
-        }
-        size
-    }
-
-    pub fn get_child(&self, names: Vec<&String>) -> Option<&Directory> {
-        let mut current = self;
-
-        for name in names {
-            match current.children.get(name) {
-                Some(child) => {
-                    current = child;
-                }
-                None => {
-                    return None;
-                }
-            }
-        }
-
-        Some(current)
-    }
-
-    pub fn get_directories(&self) -> Vec<&Directory> {
-        let mut directories = vec![];
-
-        for child in &self.children {
-            if child.1.children.is_empty() {
-                // file
-                continue;
-            } else {
-                // recursive
-                directories.push(child.1);
-
-                let mut child_directories = child.1.get_directories();
-                directories.append(&mut child_directories);
-            }
-        }
-
-        directories
-    }
-}
-
-impl Display for Directory {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.children.is_empty() {
-            // file
-            write!(f, "{} (file, size={})", self.name, self.size)
-        } else {
-            // directory
-            write!(f, "{} (dir, size={})", self.name, self.size)
-        }
     }
 }

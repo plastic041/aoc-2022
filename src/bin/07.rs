@@ -1,15 +1,59 @@
-use advent_of_code::helpers::Directory;
+use std::collections::BTreeMap;
+
+#[derive(Debug)]
+struct Entry {
+    name: String,
+    is_file: bool,
+    size: i32,
+    children: BTreeMap<String, Entry>,
+}
+
+impl Entry {
+    fn new(name: String, size: i32) -> Self {
+        Entry {
+            name,
+            is_file: size > 0,
+            size,
+            children: BTreeMap::new(),
+        }
+    }
+
+    fn add_entry(&mut self, child: Entry) {
+        self.children.insert(child.name.to_string(), child);
+    }
+
+    fn get_dirs(&self) -> Vec<&Entry> {
+        let mut children = vec![self];
+
+        for child in &self.children {
+            if !child.1.is_file {
+                children.append(&mut child.1.get_dirs());
+            }
+        }
+
+        children
+    }
+
+    fn get_size(&self) -> i32 {
+        match self.is_file {
+            true => self.size,
+            false => self.children.iter().map(|d| d.1.get_size()).sum(),
+        }
+    }
+}
 
 pub fn part_one(input: &str) -> Option<i32> {
-    let mut dir = Directory::new("/".to_string(), 0);
+    let mut dir = Entry::new("/".to_string(), 0);
     let mut paths: Vec<String> = vec![];
 
     let mut lines = input.lines();
 
-    lines.next();
+    lines.next(); // skips cd /
 
     for line in lines {
-        if line.starts_with("$ cd") {
+        if line.starts_with("$ ls") || line.starts_with("dir") {
+            continue;
+        } else if line.starts_with("$ cd") {
             // command
             let mut parts = line.split_whitespace();
             let _ = parts.next(); // $
@@ -24,8 +68,6 @@ pub fn part_one(input: &str) -> Option<i32> {
                     paths.push(name.to_string());
                 }
             }
-        } else if line.starts_with("$ ls") || line.starts_with("dir") {
-            continue;
         } else {
             // "size file_name"
             let mut parts = line.split_whitespace();
@@ -37,30 +79,26 @@ pub fn part_one(input: &str) -> Option<i32> {
                 current = current
                     .children
                     .entry(path.to_string())
-                    .or_insert_with(|| Directory::new(path.to_string(), 0));
+                    .or_insert_with(|| Entry::new(name.to_string(), 0));
             }
 
-            current.add_child(name.to_string(), Directory::new(name.to_string(), size));
+            current.add_entry(Entry::new(name.to_string(), size));
         }
     }
 
-    let dirs = dir.get_directories();
+    let dirs = dir.get_dirs();
 
+    println!("dirs: {:#?}", dirs);
+    let sizes = dirs.iter().map(|d| d.get_size()).collect::<Vec<i32>>();
+    println!("sizes: {:?}", sizes);
     let max = 100000;
+    let sizes_below_max: i32 = sizes.iter().filter(|s| **s < max).sum();
 
-    let mut sum = 0;
-
-    for d in dirs {
-        if d.get_size() <= max {
-            sum += d.get_size();
-        }
-    }
-
-    Some(sum)
+    Some(sizes_below_max)
 }
 
 pub fn part_two(input: &str) -> Option<i32> {
-    let mut dir = Directory::new("/".to_string(), 0);
+    let mut dir = Entry::new("/".to_string(), 0);
     let mut paths: Vec<String> = vec![];
 
     let mut lines = input.lines();
@@ -68,7 +106,9 @@ pub fn part_two(input: &str) -> Option<i32> {
     lines.next();
 
     for line in lines {
-        if line.starts_with("$ cd") {
+        if line.starts_with("$ ls") || line.starts_with("dir") {
+            continue;
+        } else if line.starts_with("$ cd") {
             // command
             let mut parts = line.split_whitespace();
             let _ = parts.next(); // $
@@ -83,8 +123,6 @@ pub fn part_two(input: &str) -> Option<i32> {
                     paths.push(name.to_string());
                 }
             }
-        } else if line.starts_with("$ ls") || line.starts_with("dir") {
-            continue;
         } else {
             // "size file_name"
             let mut parts = line.split_whitespace();
@@ -96,14 +134,14 @@ pub fn part_two(input: &str) -> Option<i32> {
                 current = current
                     .children
                     .entry(path.to_string())
-                    .or_insert_with(|| Directory::new(path.to_string(), 0));
+                    .or_insert_with(|| Entry::new(name.to_string(), 0));
             }
 
-            current.add_child(name.to_string(), Directory::new(name.to_string(), size));
+            current.add_entry(Entry::new(name.to_string(), size));
         }
     }
 
-    let mut dirs = dir.get_directories();
+    let mut dirs = dir.get_dirs();
     let device_size = 70000000;
     let device_size_remain = device_size - dir.get_size();
     let should_be = 30000000;
