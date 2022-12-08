@@ -56,23 +56,23 @@ fn calc(opponent: &str, you: &str) -> Option<i32> {
     let score = match opponent {
         // rock
         "A" => match you {
-            "X" => 0 + 3, // you lose by scissors
-            "Y" => 3 + 1, // you draw by rock
-            "Z" => 6 + 2, // you win by paper
+            "X" => 3, // you lose by scissors 0 + 3
+            "Y" => 4, // you draw by rock 3 + 1
+            "Z" => 8, // you win by paper 6 + 2
             _ => panic!("Invalid shape"),
         },
         // paper
         "B" => match you {
-            "X" => 0 + 1, // you lose by rock
-            "Y" => 3 + 2, // you draw by paper
-            "Z" => 6 + 3, // you win by scissors
+            "X" => 1, // you lose by rock 0 + 1
+            "Y" => 5, // you draw by paper 3 + 2
+            "Z" => 9, // you win by scissors 6 + 3
             _ => panic!("Invalid shape"),
         },
         // scissors
         "C" => match you {
-            "X" => 0 + 2, // you lose by paper
-            "Y" => 3 + 3, // you draw by scissors
-            "Z" => 6 + 1, // you win by rock
+            "X" => 2, // you lose by paper 0 + 2
+            "Y" => 6, // you draw by scissors 3 + 3
+            "Z" => 7, // you win by rock 6 + 1
             _ => panic!("Invalid shape"),
         },
         _ => panic!("Invalid shape"),

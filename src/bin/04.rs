@@ -4,15 +4,15 @@ pub fn part_one(input: &str) -> Option<i32> {
     let mut pairs_count: i32 = 0;
 
     for line in lines {
-        let mut split = line.split(",");
+        let mut split = line.split(',');
         let first = split.next().unwrap();
         let second = split.next().unwrap();
 
-        let mut firsts = first.split("-");
+        let mut firsts = first.split('-');
         let first_start = firsts.next().unwrap().parse::<i32>().unwrap();
         let first_end = firsts.next().unwrap().parse::<i32>().unwrap();
 
-        let mut seconds = second.split("-");
+        let mut seconds = second.split('-');
         let second_start = seconds.next().unwrap().parse::<i32>().unwrap();
         let second_end = seconds.next().unwrap().parse::<i32>().unwrap();
 
@@ -32,15 +32,15 @@ pub fn part_two(input: &str) -> Option<i32> {
     let mut pairs_count: i32 = 0;
 
     for line in lines {
-        let mut split = line.split(",");
+        let mut split = line.split(',');
         let first = split.next().unwrap();
         let second = split.next().unwrap();
 
-        let mut firsts = first.split("-");
+        let mut firsts = first.split('-');
         let first_start = firsts.next().unwrap().parse::<i32>().unwrap();
         let first_end = firsts.next().unwrap().parse::<i32>().unwrap();
 
-        let mut seconds = second.split("-");
+        let mut seconds = second.split('-');
         let second_start = seconds.next().unwrap().parse::<i32>().unwrap();
         let second_end = seconds.next().unwrap().parse::<i32>().unwrap();
 

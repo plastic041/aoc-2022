@@ -37,7 +37,7 @@ pub fn part_one(input: &str) -> Option<String> {
             .replace("from ", "")
             .replace("to ", "");
 
-        let mut split = line.split(" ");
+        let mut split = line.split(' ');
         let move_count = split.next().unwrap().parse::<usize>().unwrap();
         let from = split.next().unwrap().parse::<usize>().unwrap() - 1;
         let to = split.next().unwrap().parse::<usize>().unwrap() - 1;
@@ -50,7 +50,7 @@ pub fn part_one(input: &str) -> Option<String> {
 
     let mut lasts: Vec<char> = vec![];
     for cargo in cargos {
-        lasts.push(cargo.last().unwrap().clone());
+        lasts.push(*cargo.last().unwrap());
     }
 
     Some(lasts.into_iter().collect())
@@ -95,7 +95,7 @@ pub fn part_two(input: &str) -> Option<String> {
             .replace("from ", "")
             .replace("to ", "");
 
-        let mut split = line.split(" ");
+        let mut split = line.split(' ');
         let move_count = split.next().unwrap().parse::<usize>().unwrap();
         let from = split.next().unwrap().parse::<usize>().unwrap() - 1;
         let to = split.next().unwrap().parse::<usize>().unwrap() - 1;
@@ -114,7 +114,7 @@ pub fn part_two(input: &str) -> Option<String> {
 
     let mut lasts: Vec<char> = vec![];
     for cargo in cargos {
-        lasts.push(cargo.last().unwrap().clone());
+        lasts.push(*cargo.last().unwrap());
     }
 
     Some(lasts.into_iter().collect())
