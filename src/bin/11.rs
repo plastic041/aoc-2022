@@ -63,7 +63,6 @@ pub fn part_one(input: &str) -> Option<u32> {
             let _ = parts.next();
             let items = parts.next().unwrap().trim();
 
-            println!("Items: {}", items);
             let monkey = monkeys.last_mut().unwrap();
             monkey.items = items
                 .split(',')
@@ -135,84 +134,41 @@ pub fn part_one(input: &str) -> Option<u32> {
         }
     }
 
-    for i in 0..20 {
+    for _ in 0..20 {
         for monkey_index in 0..monkeys.len() {
             let (left, mid_right) = monkeys.split_at_mut(monkey_index);
             let (mid, right) = mid_right.split_at_mut(1);
 
             let monkey = &mut mid[0];
-            println!("current monkey: {:?}", monkey.id);
-            println!("items: {:?}", monkey.items);
-
-            println!("Monkey {} round {}", monkey.id, i);
             for item in monkey.items.iter_mut() {
                 // inspect
-                println!(
-                    "   Monkey inspects item {} with a worry level of {}",
-                    monkey.id, item.worry_level
-                );
                 monkey.inspected_count += 1;
 
                 // operate
                 item.worry_level = match monkey.operation {
                     Some(Operation::Add) => item.worry_level + monkey.operation_value.unwrap(),
-                    Some(Operation::Multiply) => {
-                        println!(
-                            "       {} * {}",
-                            item.worry_level,
-                            monkey.operation_value.unwrap()
-                        );
-                        item.worry_level * monkey.operation_value.unwrap()
-                    }
+                    Some(Operation::Multiply) => item.worry_level * monkey.operation_value.unwrap(),
                     Some(Operation::Square) => item.worry_level * item.worry_level,
                     None => panic!("No operation"),
                 };
-                println!(
-                    "       Monkey {} operates on item {} to {}",
-                    monkey.id, item.worry_level, item.worry_level
-                );
 
                 // gets bored
                 item.worry_level /= 3;
-                println!(
-                    "       Monkey {} gets bored with item {} to {}",
-                    monkey.id, item.worry_level, item.worry_level
-                );
 
                 // test
                 let test_result = item.worry_level % monkey.test_divider.unwrap() as u64 == 0;
-                println!(
-                    "       Monkey {} tests item {} to {}",
-                    monkey.id, item.worry_level, test_result
-                );
 
                 // if true
                 if test_result {
-                    println!(
-                        "       Monkey {} throws item {} to monkey {}",
-                        monkey.id,
-                        item.worry_level,
-                        monkey.throw_to_if_true.unwrap()
-                    );
-
                     for other_monkey in left.iter_mut().chain(right.iter_mut()) {
                         if other_monkey.id == monkey.throw_to_if_true.unwrap() {
-                            println!("other: {}", other_monkey.id);
                             // throw item
                             other_monkey.items.push(*item);
                         }
                     }
                 } else {
-                    println!(
-                        "       Monkey {} throws item {} to monkey {}",
-                        monkey.id,
-                        item.worry_level,
-                        monkey.throw_to_if_false.unwrap()
-                    );
-
                     for other_monkey in left.iter_mut().chain(right.iter_mut()) {
                         if other_monkey.id == monkey.throw_to_if_false.unwrap() {
-                            println!("other: {}", other_monkey.id);
                             // throw item
                             other_monkey.items.push(*item);
                         }
@@ -221,13 +177,6 @@ pub fn part_one(input: &str) -> Option<u32> {
             }
             monkey.items.clear();
         }
-    }
-
-    for monkey in monkeys.iter() {
-        println!(
-            "Monkey {}: count: {}, items: {:?}",
-            monkey.id, monkey.inspected_count, monkey.items
-        );
     }
 
     let mut inspected_counts = monkeys
@@ -242,7 +191,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(first * second)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u64> {
     let lines = input.lines().map(|line| line.trim());
 
     let mut monkeys: Vec<Monkey> = Vec::new();
@@ -266,7 +215,6 @@ pub fn part_two(input: &str) -> Option<u32> {
             let _ = parts.next();
             let items = parts.next().unwrap().trim();
 
-            println!("Items: {}", items);
             let monkey = monkeys.last_mut().unwrap();
             monkey.items = items
                 .split(',')
@@ -340,80 +288,41 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     let modulus: u64 = monkeys.iter().map(|m| m.test_divider.unwrap()).product();
 
-    for i in 0..10000 {
+    for _ in 0..10000 {
         for monkey_index in 0..monkeys.len() {
             let (left, mid_right) = monkeys.split_at_mut(monkey_index);
             let (mid, right) = mid_right.split_at_mut(1);
 
             let monkey = &mut mid[0];
-            println!("current monkey: {:?}", monkey.id);
-            println!("items: {:?}", monkey.items);
-
-            println!("Monkey {} round {}", monkey.id, i);
             for item in monkey.items.iter_mut() {
                 // inspect
-                println!(
-                    "   Monkey inspects item {} with a worry level of {}",
-                    monkey.id, item.worry_level
-                );
                 monkey.inspected_count += 1;
 
                 // operate
                 item.worry_level = match monkey.operation {
                     Some(Operation::Add) => item.worry_level + monkey.operation_value.unwrap(),
-                    Some(Operation::Multiply) => {
-                        println!(
-                            "       {} * {}",
-                            item.worry_level,
-                            monkey.operation_value.unwrap()
-                        );
-                        item.worry_level * monkey.operation_value.unwrap()
-                    }
+                    Some(Operation::Multiply) => item.worry_level * monkey.operation_value.unwrap(),
                     Some(Operation::Square) => item.worry_level * item.worry_level,
                     None => panic!("No operation"),
                 };
-                println!(
-                    "       Monkey {} operates on item {} to {}",
-                    monkey.id, item.worry_level, item.worry_level
-                );
 
                 // manage worry level
                 item.worry_level %= modulus;
 
                 // test
                 let test_result = item.worry_level % monkey.test_divider.unwrap() as u64 == 0;
-                println!(
-                    "       Monkey {} tests item {} to {}",
-                    monkey.id, item.worry_level, test_result
-                );
 
                 // if true
                 if test_result {
-                    println!(
-                        "       Monkey {} throws item {} to monkey {}",
-                        monkey.id,
-                        item.worry_level,
-                        monkey.throw_to_if_true.unwrap()
-                    );
-
                     for other_monkey in left.iter_mut().chain(right.iter_mut()) {
                         if other_monkey.id == monkey.throw_to_if_true.unwrap() {
-                            println!("other: {}", other_monkey.id);
                             // throw item
                             other_monkey.items.push(*item);
                         }
                     }
                 } else {
-                    println!(
-                        "       Monkey {} throws item {} to monkey {}",
-                        monkey.id,
-                        item.worry_level,
-                        monkey.throw_to_if_false.unwrap()
-                    );
-
                     for other_monkey in left.iter_mut().chain(right.iter_mut()) {
                         if other_monkey.id == monkey.throw_to_if_false.unwrap() {
-                            println!("other: {}", other_monkey.id);
                             // throw item
                             other_monkey.items.push(*item);
                         }
@@ -422,13 +331,6 @@ pub fn part_two(input: &str) -> Option<u32> {
             }
             monkey.items.clear();
         }
-    }
-
-    for monkey in monkeys.iter() {
-        println!(
-            "Monkey {}: count: {}, items: {:?}",
-            monkey.id, monkey.inspected_count, monkey.items
-        );
     }
 
     let mut inspected_counts = monkeys
@@ -440,7 +342,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let first = inspected_counts.next().unwrap();
     let second = inspected_counts.next().unwrap();
 
-    Some(first * second)
+    Some(first as u64 * second as u64)
 }
 
 fn main() {
