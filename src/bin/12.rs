@@ -152,62 +152,38 @@ impl Grid {
         neighbors
     }
 
-    fn get(&self, x: i32, y: i32) -> Option<&Point> {
-        // find point
-        let index = y * self.width + x;
+    fn parse(input: &str) -> Self {
+        let mut char_height = ('a'..='z')
+            .enumerate()
+            .map(|(i, c)| (c, i as i32 + 1))
+            .collect::<HashMap<char, i32>>();
 
-        if index < self.points.len() as i32 {
-            Some(&self.points[index as usize])
-        } else {
-            None
-        }
-    }
-}
+        char_height.insert('S', *char_height.get(&'a').unwrap());
+        char_height.insert('E', *char_height.get(&'z').unwrap());
 
-impl Display for Grid {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let point = self.get(x, y).unwrap();
-                write!(f, "{}", point)?;
-            }
-            writeln!(f)?;
-        }
-        Ok(())
-    }
-}
+        let mut grid = Grid::new();
+        grid.width = input.lines().next().unwrap().len() as i32;
+        grid.height = input.lines().count() as i32;
 
-fn parse_grid(input: &str) -> Grid {
-    let mut char_height = ('a'..='z')
-        .enumerate()
-        .map(|(i, c)| (c, i as i32 + 1))
-        .collect::<HashMap<char, i32>>();
-
-    char_height.insert('S', *char_height.get(&'a').unwrap());
-    char_height.insert('E', *char_height.get(&'z').unwrap());
-
-    let mut grid = Grid::new();
-    grid.width = input.lines().next().unwrap().len() as i32;
-    grid.height = input.lines().count() as i32;
-
-    for (y, line) in input.lines().enumerate() {
-        for (x, c) in line.chars().enumerate() {
-            if let Some(height) = char_height.get(&c) {
-                grid.points.push(Point {
-                    x: x as i32,
-                    y: y as i32,
-                    letter: c,
-                    height: *height,
-                });
+        for (y, line) in input.lines().enumerate() {
+            for (x, c) in line.chars().enumerate() {
+                if let Some(height) = char_height.get(&c) {
+                    grid.points.push(Point {
+                        x: x as i32,
+                        y: y as i32,
+                        letter: c,
+                        height: *height,
+                    });
+                }
             }
         }
-    }
 
-    grid
+        grid
+    }
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let grid = parse_grid(input);
+    let grid = Grid::parse(input);
 
     let start_point = grid
         .points
@@ -229,7 +205,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let grid = parse_grid(input);
+    let grid = Grid::parse(input);
 
     let start_point = grid
         .points
