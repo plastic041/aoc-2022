@@ -1,3 +1,4 @@
+use core::panic;
 use std::{cmp::Ordering, fmt::Display};
 
 use ndarray::{s, Array2};
@@ -38,8 +39,66 @@ impl Block {
 struct Grid(Array2<Block>);
 
 impl Grid {
-    fn new(width: usize, height: usize) -> Self {
-        Grid(Array2::default((width, height)))
+    fn new(paths: &Vec<Vec<(usize, usize)>>) -> Self {
+        let biggest_x = *paths
+            .iter()
+            .map(|path| path.iter().map(|(x, _)| x).max().unwrap())
+            .max()
+            .unwrap();
+
+        let biggest_y = *paths
+            .iter()
+            .map(|path| path.iter().map(|(_, y)| y).max().unwrap())
+            .max()
+            .unwrap();
+
+        let width = biggest_x + biggest_y;
+        let height = biggest_y + 3;
+
+        let mut grid: Grid = Grid(Array2::<Block>::default((width, height)));
+
+        for x in 0..width {
+            grid.0[[x, height - 1]] = Block {
+                state: BlockState::Rock,
+            };
+        }
+
+        for path in paths {
+            let (x, y) = path[0];
+            grid.0[[x, y]] = Block {
+                state: BlockState::Rock,
+            };
+            for i in 0..path.len() {
+                let current = path.get(i).unwrap();
+                let next = path.get(i + 1);
+
+                if let Some(next) = next {
+                    let mut x = current.0;
+                    let mut y = current.1;
+
+                    while x != next.0 || y != next.1 {
+                        // While we're not at the next coord, move towards it
+                        match x.cmp(&next.0) {
+                            Ordering::Less => x += 1,
+                            Ordering::Greater => x -= 1,
+                            Ordering::Equal => (),
+                        }
+
+                        match y.cmp(&next.1) {
+                            Ordering::Less => y += 1,
+                            Ordering::Greater => y -= 1,
+                            Ordering::Equal => (),
+                        }
+
+                        grid.0[[x, y]] = Block {
+                            state: BlockState::Rock,
+                        };
+                    }
+                }
+            }
+        }
+
+        grid
     }
 
     fn fall(&self, x: usize, y: usize) -> Option<(usize, usize)> {
@@ -71,98 +130,48 @@ impl Grid {
 
         None
     }
+
+    fn is_out_of_bound(&self, x: usize, y: usize) -> bool {
+        match self.0.get((x, y)) {
+            Some(_) => {
+                let height = self.0.shape()[1]; // 12
+                y > height - 3
+            }
+            None => panic!("Out of bound ({}, {})", x, y),
+        }
+    }
+}
+
+fn parse_paths(input: &str) -> Vec<Vec<(usize, usize)>> {
+    input
+        .lines()
+        .map(|line| {
+            line.split(" -> ")
+                .map(|xy| {
+                    let mut split = xy.split(',');
+                    let x = split.next().unwrap().parse().unwrap();
+                    let y = split.next().unwrap().parse().unwrap();
+
+                    (x, y)
+                })
+                .collect::<Vec<(usize, usize)>>()
+        })
+        .collect::<Vec<Vec<(usize, usize)>>>()
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let mut paths: Vec<Vec<(usize, usize)>> = Vec::new();
+    let paths = parse_paths(input);
 
-    for line in input.lines() {
-        let mut path = Vec::new();
-        let split = line.split(" -> ");
-
-        for xy in split {
-            let mut coord: (usize, usize) = (0, 0);
-            let mut split = xy.split(',');
-            let x = split.next().unwrap().parse().unwrap();
-            let y = split.next().unwrap().parse().unwrap();
-
-            coord.0 = x;
-            coord.1 = y;
-
-            path.push(coord);
-        }
-
-        paths.push(path);
-    }
-
-    let max_x = *paths
-        .iter()
-        .map(|path| path.iter().map(|(x, _)| x).max().unwrap())
-        .max()
-        .unwrap();
-    let max_y = *paths
-        .iter()
-        .map(|path| path.iter().map(|(_, y)| y).max().unwrap())
-        .max()
-        .unwrap();
-
-    let mut grid: Grid = Grid::new(max_x + 1, max_y + 1);
-
-    for path in paths {
-        let (x, y) = path[0];
-        grid.0[[x, y]] = Block {
-            state: BlockState::Rock,
-        };
-        for i in 0..path.len() {
-            let current = path.get(i).unwrap();
-            let next = path.get(i + 1);
-
-            if let Some(next) = next {
-                let mut x = current.0;
-                let mut y = current.1;
-
-                while x != next.0 || y != next.1 {
-                    // While we're not at the next coord, move towards it
-                    match x.cmp(&next.0) {
-                        Ordering::Less => x += 1,
-                        Ordering::Greater => x -= 1,
-                        Ordering::Equal => (),
-                    }
-
-                    match y.cmp(&next.1) {
-                        Ordering::Less => y += 1,
-                        Ordering::Greater => y -= 1,
-                        Ordering::Equal => (),
-                    }
-
-                    grid.0[[x, y]] = Block {
-                        state: BlockState::Rock,
-                    };
-                }
-            }
-        }
-    }
-
-    // // print grid
-    // // 494 <= x <= 503
-    // // 0 <= y <= 9
-    // for y in 0..=9 {
-    //     for x in 494..=503 {
-    //         let block = &grid.0[[x, y]];
-    //         match block.state {
-    //             BlockState::Empty => print!("."),
-    //             BlockState::Rock => print!("#"),
-    //             BlockState::Sand => print!("o"),
-    //         }
-    //     }
-    //     println!();
-    // }
+    let mut grid: Grid = Grid::new(&paths);
 
     let start = (500, 0);
 
     let mut count = 0;
 
     while let Some((x, y)) = grid.fall(start.0, start.1) {
+        if grid.is_out_of_bound(x, y) {
+            break;
+        }
         count += 1;
         grid.0[[x, y]] = Block {
             state: BlockState::Sand,
@@ -173,77 +182,9 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let mut paths: Vec<Vec<(usize, usize)>> = Vec::new();
+    let paths = parse_paths(input);
 
-    for line in input.lines() {
-        let mut path = Vec::new();
-        let split = line.split(" -> ");
-
-        for xy in split {
-            let mut coord: (usize, usize) = (0, 0);
-            let mut split = xy.split(',');
-            let x = split.next().unwrap().parse().unwrap();
-            let y = split.next().unwrap().parse().unwrap();
-
-            coord.0 = x;
-            coord.1 = y;
-
-            path.push(coord);
-        }
-
-        paths.push(path);
-    }
-
-    let max_x = 5000;
-    let max_y = *paths
-        .iter()
-        .map(|path| path.iter().map(|(_, y)| y).max().unwrap())
-        .max()
-        .unwrap();
-
-    let mut grid: Grid = Grid::new(max_x, max_y + 3);
-
-    // fill max_y + 2 with rocks
-    for x in 0..max_x {
-        grid.0[[x, max_y + 2]] = Block {
-            state: BlockState::Rock,
-        };
-    }
-
-    for path in paths {
-        let (x, y) = path[0];
-        grid.0[[x, y]] = Block {
-            state: BlockState::Rock,
-        };
-        for i in 0..path.len() {
-            let current = path.get(i).unwrap();
-            let next = path.get(i + 1);
-
-            if let Some(next) = next {
-                let mut x = current.0;
-                let mut y = current.1;
-
-                while x != next.0 || y != next.1 {
-                    // While we're not at the next coord, move towards it
-                    match x.cmp(&next.0) {
-                        Ordering::Less => x += 1,
-                        Ordering::Greater => x -= 1,
-                        Ordering::Equal => (),
-                    }
-
-                    match y.cmp(&next.1) {
-                        Ordering::Less => y += 1,
-                        Ordering::Greater => y -= 1,
-                        Ordering::Equal => (),
-                    }
-
-                    grid.0[[x, y]] = Block {
-                        state: BlockState::Rock,
-                    };
-                }
-            }
-        }
-    }
+    let mut grid: Grid = Grid::new(&paths);
 
     let start = (500, 0);
 
