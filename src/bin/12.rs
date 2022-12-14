@@ -1,12 +1,15 @@
 use std::{
+    cmp::Ordering,
     collections::{HashMap, VecDeque},
     fmt::{Display, Error, Formatter},
 };
 
+use ndarray::Array2;
+
 #[derive(Clone, PartialEq, PartialOrd, Debug)]
 struct Point {
-    x: i32,
-    y: i32,
+    x: usize,
+    y: usize,
     letter: char,
     height: i32,
 }
@@ -30,9 +33,16 @@ impl Point {
     fn can_climb(&self, other: &Point) -> bool {
         other.height - self.height <= 1
     }
+}
 
-    fn can_decend(&self, other: &Point) -> bool {
-        self.height - other.height <= 1
+impl Default for Point {
+    fn default() -> Self {
+        Self {
+            x: 0,
+            y: 0,
+            letter: ' ',
+            height: 0,
+        }
     }
 }
 
@@ -47,17 +57,13 @@ impl Display for Point {
 
 #[derive(Debug)]
 struct Grid {
-    width: i32,
-    height: i32,
-    points: Vec<Point>,
+    points: Array2<Point>,
 }
 
 impl Grid {
-    fn new() -> Self {
+    fn new(w: usize, h: usize) -> Self {
         Self {
-            width: 0,
-            height: 0,
-            points: Vec::new(),
+            points: Array2::default((w, h)),
         }
     }
 
@@ -122,7 +128,7 @@ impl Grid {
             // get neighbors of last point
             for neighbor in self.neighbors(last) {
                 // if neighbor is not visited and can decend to neighbor
-                if !visited.contains(&neighbor) && last.can_decend(&neighbor) {
+                if !visited.contains(&neighbor) && neighbor.can_climb(last) {
                     // add neighbor to path and push path to queue
                     let mut new_path = path.clone();
                     new_path.push(neighbor.clone());
@@ -139,16 +145,36 @@ impl Grid {
 
     fn neighbors(&self, start: &Point) -> Vec<Point> {
         let mut neighbors: Vec<Point> = Vec::new();
-        for other_point in &self.points {
-            if start.x == other_point.x && (start.y - other_point.y).abs() == 1 {
-                // up or down
-                neighbors.push(other_point.clone());
+        match (start.x.cmp(&0), start.y.cmp(&0)) {
+            (Ordering::Greater, Ordering::Greater) => {
+                neighbors.push(self.points.get((start.x - 1, start.y)).unwrap().clone());
+                neighbors.push(self.points.get((start.x, start.y - 1)).unwrap().clone());
             }
-            if start.y == other_point.y && (start.x - other_point.x).abs() == 1 {
-                // left or right
-                neighbors.push(other_point.clone());
+            (Ordering::Greater, Ordering::Equal) => {
+                neighbors.push(self.points.get((start.x - 1, start.y)).unwrap().clone());
             }
+            (Ordering::Equal, Ordering::Greater) => {
+                neighbors.push(self.points.get((start.x, start.y - 1)).unwrap().clone());
+            }
+            _ => {}
         }
+        match (
+            start.x.cmp(&(self.points.shape()[0] - 1)),
+            start.y.cmp(&(self.points.shape()[1] - 1)),
+        ) {
+            (Ordering::Less, Ordering::Less) => {
+                neighbors.push(self.points.get((start.x + 1, start.y)).unwrap().clone());
+                neighbors.push(self.points.get((start.x, start.y + 1)).unwrap().clone());
+            }
+            (Ordering::Less, Ordering::Equal) => {
+                neighbors.push(self.points.get((start.x + 1, start.y)).unwrap().clone());
+            }
+            (Ordering::Equal, Ordering::Less) => {
+                neighbors.push(self.points.get((start.x, start.y + 1)).unwrap().clone());
+            }
+            _ => {}
+        }
+
         neighbors
     }
 
@@ -161,19 +187,19 @@ impl Grid {
         char_height.insert('S', *char_height.get(&'a').unwrap());
         char_height.insert('E', *char_height.get(&'z').unwrap());
 
-        let mut grid = Grid::new();
-        grid.width = input.lines().next().unwrap().len() as i32;
-        grid.height = input.lines().count() as i32;
+        let width = input.lines().next().unwrap().len();
+        let height = input.lines().count();
+        let mut grid = Grid::new(width, height);
 
         for (y, line) in input.lines().enumerate() {
             for (x, c) in line.chars().enumerate() {
                 if let Some(height) = char_height.get(&c) {
-                    grid.points.push(Point {
-                        x: x as i32,
-                        y: y as i32,
+                    grid.points[[x, y]] = Point {
+                        x,
+                        y,
                         letter: c,
                         height: *height,
-                    });
+                    };
                 }
             }
         }
