@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use nom::{bytes::complete::tag, IResult};
 
 trait Point {
@@ -100,8 +98,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         .map(|line| parse_line(line).unwrap().1)
         .collect();
 
-    // let mut checked: Vec<bool> = vec![false; 25];
-    let mut checked: HashMap<i32, bool> = HashMap::new();
+    let mut checked = 0;
 
     for pair in &pairs {
         let dist = distance(&pair.sensor, &pair.beacon) as i32;
@@ -110,8 +107,8 @@ pub fn part_one(input: &str) -> Option<u32> {
             let from = pair.sensor.x - dist;
             let to = pair.sensor.x + dist;
 
-            for i in from..=to {
-                checked.insert(i, true);
+            for _ in from..=to {
+                checked += 1;
             }
         }
     }
@@ -120,11 +117,11 @@ pub fn part_one(input: &str) -> Option<u32> {
         let beacon = &pair.beacon;
 
         if beacon.y == check_y {
-            checked.remove(&beacon.x);
+            checked -= 1;
         }
     });
 
-    Some(checked.len() as u32)
+    Some(checked)
 }
 
 pub fn part_two(_input: &str) -> Option<u32> {
