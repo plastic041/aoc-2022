@@ -124,8 +124,52 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(checked)
 }
 
-pub fn part_two(_input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<u64> {
+    let max_x = 4_000_000;
+
+    let pairs: Vec<Pair> = input
+        .lines()
+        .map(|line| parse_line(line).unwrap().1)
+        .collect();
+
+    let mut y = 0;
+    let mut x = 0;
+    let mut can_exit = false;
+    'outer: loop {
+        let point = Beacon::new(x, y);
+
+        for pair in &pairs {
+            let dist_to_s = distance(&point, &pair.sensor);
+            let dist_s_b = distance(&pair.sensor, &pair.beacon);
+
+            if dist_to_s > dist_s_b {
+                can_exit = true;
+            } else {
+                can_exit = false;
+                // not distress
+
+                // jump to next location
+                let x_to = dist_s_b as i32 - (y - pair.sensor.y).abs() + pair.sensor.x + 1;
+
+                if x_to > max_x {
+                    x = 0;
+                    y += 1;
+                } else {
+                    x = x_to;
+                }
+
+                continue 'outer;
+            }
+        }
+
+        if can_exit {
+            break;
+        }
+    }
+
+    let frequency = (x as u64) * 4_000_000 + y as u64;
+
+    Some(frequency)
 }
 
 fn main() {
@@ -147,6 +191,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 15);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(56000011));
     }
 }
