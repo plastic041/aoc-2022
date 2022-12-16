@@ -131,8 +131,6 @@ fn find_best_total_flow(
         .filter(|target| !new_seen.contains(*target))
         .collect::<Vec<_>>();
 
-    println!("{}: {} {:?}", time, current_id, targets);
-
     let mut best_flow = 0;
     for target in &targets {
         let time_left = time - routes[current_id][*target] - 1;
