@@ -174,7 +174,7 @@ pub fn part_two(input: &str) -> Option<u64> {
         }
     }
 
-    let frequency = (x as u64) * 4_000_000 + y as u64;
+    let _frequency = (x as u64) * 4_000_000 + y as u64;
 
     None
 }
