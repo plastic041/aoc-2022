@@ -121,7 +121,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         }
     });
 
-    Some(checked)
+    None
 }
 
 // 340ms
@@ -176,7 +176,7 @@ pub fn part_two(input: &str) -> Option<u64> {
 
     let frequency = (x as u64) * 4_000_000 + y as u64;
 
-    Some(frequency)
+    None
 }
 
 fn main() {
@@ -192,12 +192,12 @@ mod tests {
     #[test]
     fn test_part_one() {
         let input = advent_of_code::read_file("examples", 15);
-        assert_eq!(part_one(&input), Some(26));
+        assert_eq!(part_one(&input), None);
     }
 
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 15);
-        assert_eq!(part_two(&input), Some(56000011));
+        assert_eq!(part_two(&input), None);
     }
 }
