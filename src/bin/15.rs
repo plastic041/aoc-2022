@@ -124,13 +124,21 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(checked)
 }
 
+// 340ms
+
 pub fn part_two(input: &str) -> Option<u64> {
     let max_x = 4_000_000;
 
-    let pairs: Vec<Pair> = input
+    let sensors_with_dists: Vec<(Sensor, u32)> = input
         .lines()
-        .map(|line| parse_line(line).unwrap().1)
-        .collect();
+        .map(|line| {
+            let pair = parse_line(line).unwrap().1;
+
+            let dist = distance(&pair.sensor, &pair.beacon);
+
+            (pair.sensor, dist)
+        })
+        .collect::<Vec<_>>();
 
     let mut y = 0;
     let mut x = 0;
@@ -138,18 +146,17 @@ pub fn part_two(input: &str) -> Option<u64> {
     'outer: loop {
         let point = Beacon::new(x, y);
 
-        for pair in &pairs {
-            let dist_to_s = distance(&point, &pair.sensor);
-            let dist_s_b = distance(&pair.sensor, &pair.beacon);
+        for (sensor, dist) in &sensors_with_dists {
+            let dist_to_s = distance(&point, sensor);
 
-            if dist_to_s > dist_s_b {
+            if dist_to_s > *dist {
                 can_exit = true;
             } else {
                 can_exit = false;
                 // not distress
 
                 // jump to next location
-                let x_to = dist_s_b as i32 - (y - pair.sensor.y).abs() + pair.sensor.x + 1;
+                let x_to = *dist as i32 - (y - sensor.y).abs() + sensor.x + 1;
 
                 if x_to > max_x {
                     x = 0;
