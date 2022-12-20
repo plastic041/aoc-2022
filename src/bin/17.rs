@@ -180,93 +180,88 @@ fn can_move(shape: &RockShape, world: &[Vec<bool>], direction: &Move) -> bool {
     }
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    let moves = Move::parse(input).unwrap();
-    let moves_len = moves.len();
-    let base_rock_shapes = vec![
-        vec![vec![false, false, true, true, true, true, false]],
-        vec![
-            vec![false, false, false, true, false, false, false],
-            vec![false, false, true, true, true, false, false],
-            vec![false, false, false, true, false, false, false],
-        ],
-        vec![
-            vec![false, false, false, false, true, false, false],
-            vec![false, false, false, false, true, false, false],
-            vec![false, false, true, true, true, false, false],
-        ],
-        vec![
-            vec![false, false, true, false, false, false, false],
-            vec![false, false, true, false, false, false, false],
-            vec![false, false, true, false, false, false, false],
-            vec![false, false, true, false, false, false, false],
-        ],
-        vec![
-            vec![false, false, true, true, false, false, false],
-            vec![false, false, true, true, false, false, false],
-        ],
-    ];
-    let mut world: Vec<Vec<bool>> = vec![];
-    let mut loop_counter = 0;
-    let mut move_counter = 0;
+pub fn part_two(_input: &str) -> Option<u32> {
+    None
+    // let moves = Move::parse(input).unwrap();
+    // let moves_len = moves.len();
+    // let base_rock_shapes = vec![
+    //     vec![vec![false, false, true, true, true, true, false]],
+    //     vec![
+    //         vec![false, false, false, true, false, false, false],
+    //         vec![false, false, true, true, true, false, false],
+    //         vec![false, false, false, true, false, false, false],
+    //     ],
+    //     vec![
+    //         vec![false, false, false, false, true, false, false],
+    //         vec![false, false, false, false, true, false, false],
+    //         vec![false, false, true, true, true, false, false],
+    //     ],
+    //     vec![
+    //         vec![false, false, true, false, false, false, false],
+    //         vec![false, false, true, false, false, false, false],
+    //         vec![false, false, true, false, false, false, false],
+    //         vec![false, false, true, false, false, false, false],
+    //     ],
+    //     vec![
+    //         vec![false, false, true, true, false, false, false],
+    //         vec![false, false, true, true, false, false, false],
+    //     ],
+    // ];
+    // let mut world: Vec<Vec<bool>> = vec![];
+    // let mut loop_counter = 0;
+    // let mut move_counter = 0;
 
-    let gcd = moves_len * 5;
+    // loop {
+    //     let current_shape = base_rock_shapes[loop_counter % 5].clone();
 
-    loop {
-        let current_shape = base_rock_shapes[loop_counter % 5].clone();
+    //     let mut shape = RockShape {
+    //         height: world.len() as u32 + 3 + current_shape.len() as u32,
+    //         rocks: current_shape,
+    //     };
+    //     for _ in 0..=shape.rocks.len() + 3 {
+    //         world.push(vec![false; 7]);
+    //     }
 
-        let mut shape = RockShape {
-            height: world.len() as u32 + 3 + current_shape.len() as u32,
-            rocks: current_shape,
-        };
-        for _ in 0..=shape.rocks.len() + 3 {
-            world.push(vec![false; 7]);
-        }
+    //     while can_fall(&shape, &world) {
+    //         let current_move = &moves[move_counter % moves_len];
+    //         move_counter += 1;
 
-        while can_fall(&shape, &world) {
-            let current_move = &moves[move_counter % moves_len];
-            move_counter += 1;
+    //         shape.height -= 1;
 
-            shape.height -= 1;
+    //         if can_move(&shape, &world, current_move) {
+    //             shape.rocks.iter_mut().for_each(|row| match current_move {
+    //                 Move::Left => {
+    //                     row.remove(0);
+    //                     row.push(false);
+    //                 }
+    //                 Move::Right => {
+    //                     row.remove(row.len() - 1);
+    //                     row.insert(0, false);
+    //                 }
+    //             });
+    //         }
+    //     }
 
-            if can_move(&shape, &world, current_move) {
-                shape.rocks.iter_mut().for_each(|row| match current_move {
-                    Move::Left => {
-                        row.remove(0);
-                        row.push(false);
-                    }
-                    Move::Right => {
-                        row.remove(row.len() - 1);
-                        row.insert(0, false);
-                    }
-                });
-            }
-        }
+    //     if move_counter % moves_len == 0 {
+    //         println!("Move: {}, Rocks: {}", move_counter, loop_counter + 1);
+    //     }
+    //     for (dy, row) in shape.rocks.iter().enumerate() {
+    //         for (x, &is_rock) in row.iter().enumerate() {
+    //             if is_rock {
+    //                 world[shape.height as usize - dy][x] = true;
+    //             }
+    //         }
+    //     }
 
-        if move_counter % moves_len == 0 {
-            println!("Move: {}, Rocks: {}", move_counter, loop_counter + 1);
-        }
-        // if move_counter % gcd == 0 {
-        //     println!("Move: {}, Rocks: {}", move_counter, loop_counter + 1);
-        // }
-        for (dy, row) in shape.rocks.iter().enumerate() {
-            for (x, &is_rock) in row.iter().enumerate() {
-                if is_rock {
-                    world[shape.height as usize - dy][x] = true;
-                }
-            }
-        }
+    //     world.retain(|row| row.iter().any(|&b| b));
 
-        world.retain(|row| row.iter().any(|&b| b));
+    //     if loop_counter == 999_999_999_999 {
+    //         break;
+    //     }
+    //     loop_counter += 1;
+    // }
 
-        // if loop_counter == 999_999_999_999 {
-        if loop_counter == 999_999_999_999 {
-            break;
-        }
-        loop_counter += 1;
-    }
-
-    Some(world.len() as u32)
+    // Some(world.len() as u32)
 }
 
 fn main() {
