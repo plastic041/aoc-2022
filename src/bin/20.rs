@@ -19,26 +19,13 @@ impl Nums for Vec<Num> {
     fn shift(&mut self, order: usize) {
         let index = self.iter().position(|num| num.order == order).unwrap() as i64;
         let num = self.remove(index as usize);
-
-        match num.value.cmp(&0) {
-            std::cmp::Ordering::Less => {
-                let len = self.len() as i64;
-                let new_index = (num.value + index) % len;
-
-                if new_index < 0 {
-                    self.insert((len + new_index) as usize, num);
-                } else {
-                    self.insert(new_index as usize, num);
-                }
-            }
-            std::cmp::Ordering::Equal => {
-                self.insert(index as usize, num);
-            }
-            std::cmp::Ordering::Greater => {
-                let len = self.len() as i64;
-                let new_index = (num.value + index) % len;
-                self.insert(new_index as usize, num);
-            }
+        if num.value == 0 {
+            self.insert(index as usize, num);
+            return;
+        } else {
+            let len = self.len() as i64;
+            let new_index = (num.value + index).rem_euclid(len);
+            self.insert(new_index as usize, num);
         }
     }
 
