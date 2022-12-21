@@ -169,29 +169,64 @@ fn get_equation_2(monkeys: &HashMap<String, Monkey>, name: &str) -> Term {
                 let other = get_equation_2(monkeys, &math.other_name);
                 let other_2 = get_equation_2(monkeys, &math.other_name_2);
 
-                if Term::Variable == other || Term::Variable == other_2 {
-                    return Term::Term(Box::new(Expression {
-                        left: other,
-                        right: other_2,
-                        operator: math.math.clone(),
-                    }));
-                } else {
-                    match (other, other_2) {
-                        (Term::Number(a), Term::Number(b)) => {
-                            let result = match math.math {
-                                Operation::Add => a + b,
-                                Operation::Multiply => a * b,
-                                Operation::Minus => a - b,
-                                Operation::Divide => a / b,
-                            };
-                            return Term::Number(result);
-                        }
-                        _ => panic!("Unknown math"),
+                match (&other, &other_2) {
+                    (Term::Variable, Term::Variable) => panic!("Can't have two variables"),
+                    (Term::Number(a), Term::Number(b)) => {
+                        let result = match math.math {
+                            Operation::Add => a + b,
+                            Operation::Multiply => a * b,
+                            Operation::Minus => a - b,
+                            Operation::Divide => a / b,
+                        };
+                        return Term::Number(result);
+                    }
+                    (_, _) => {
+                        return Term::Term(Box::new(Expression {
+                            left: other,
+                            right: other_2,
+                            operator: math.math.clone(),
+                        }));
                     }
                 }
             }
         },
     }
+}
+
+fn op(operation: &Operation, right: &mut i64, a: &i64) {
+    match operation {
+        Operation::Add => *right -= *a,
+        Operation::Multiply => *right /= *a,
+        Operation::Minus => *right += *a,
+        Operation::Divide => *right *= *a,
+    }
+}
+
+fn solve_equation(equation: &mut Term) -> i64 {
+    let mut left = equation;
+    let mut right = 0;
+
+    while let Term::Term(e) = left {
+        let left_term = &mut e.left;
+        let right_term = &mut e.right;
+
+        match (&left_term, &right_term) {
+            (Term::Variable, Term::Variable) => panic!("Can't have two variables"),
+            (Term::Number(_), Term::Number(_)) => todo!(),
+
+            (Term::Variable, Term::Number(a)) | (Term::Term(_), Term::Number(a)) => {
+                op(&e.operator, &mut right, a);
+                left = left_term;
+            }
+            (Term::Number(_), Term::Variable) => todo!(),
+            (Term::Number(_), Term::Term(_)) => todo!(),
+            (Term::Variable, Term::Term(_)) => todo!(),
+            (Term::Term(_), Term::Variable) => todo!(),
+            (Term::Term(_), Term::Term(_)) => todo!(),
+        }
+    }
+
+    0
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
@@ -214,9 +249,9 @@ pub fn part_two(input: &str) -> Option<u64> {
     }
 
     // Found this equation by hand
-    let equation = get_equation(&monkeys, "root").replace("x", "3757272361782");
+    let equation = get_equation_2(&monkeys, "root");
 
-    println!("{}", equation);
+    println!("{:?}", equation);
 
     None
 }
