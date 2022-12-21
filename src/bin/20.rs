@@ -21,7 +21,6 @@ impl Nums for Vec<Num> {
         let num = self.remove(index as usize);
         if num.value == 0 {
             self.insert(index as usize, num);
-            return;
         } else {
             let len = self.len() as i64;
             let new_index = (num.value + index).rem_euclid(len);
