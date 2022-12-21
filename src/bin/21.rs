@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 enum Job {
     Yell(i64),
@@ -62,8 +64,9 @@ impl Monkey {
     }
 }
 
-fn get_number(monkeys: &[Monkey], name: &str) -> i64 {
-    let monkey = monkeys.iter().find(|m| m.name == name).unwrap();
+fn get_number(monkeys: &HashMap<String, Monkey>, name: &str) -> i64 {
+    // let monkey = monkeys.iter().find(|m| m.name == name).unwrap();
+    let monkey = monkeys.get(name).unwrap();
     match &monkey.job {
         Job::Yell(yell) => *yell,
         Job::MathThenYell(math) => {
@@ -80,52 +83,57 @@ fn get_number(monkeys: &[Monkey], name: &str) -> i64 {
     }
 }
 
-fn check_equal(monkeys: &[Monkey], name: &str) -> i64 {
-    let monkey = monkeys.iter().find(|m| m.name == name).unwrap();
+// fn check_equal(monkeys: &[Monkey], name: &str) -> i64 {
+//     let monkey = monkeys.iter().find(|m| m.name == name).unwrap();
 
-    match monkey.name.as_str() {
-        "root" => match &monkey.job {
-            Job::Yell(_) => panic!("Root should not yell"),
-            Job::MathThenYell(math) => {
-                let other = get_number(monkeys, &math.other_name);
-                let other_2 = get_number(monkeys, &math.other_name_2);
+//     match monkey.name.as_str() {
+//         "root" => match &monkey.job {
+//             Job::Yell(_) => panic!("Root should not yell"),
+//             Job::MathThenYell(math) => {
+//                 let other = get_number(monkeys, &math.other_name);
+//                 let other_2 = get_number(monkeys, &math.other_name_2);
 
-                if other == other_2 {
-                    -1
-                } else {
-                    -2
-                }
-            }
-        },
-        _ => match &monkey.job {
-            Job::Yell(yell) => *yell,
-            Job::MathThenYell(math) => {
-                let other = get_number(monkeys, &math.other_name);
-                let other_2 = get_number(monkeys, &math.other_name_2);
+//                 if other == other_2 {
+//                     -1
+//                 } else {
+//                     -2
+//                 }
+//             }
+//         },
+//         _ => match &monkey.job {
+//             Job::Yell(yell) => *yell,
+//             Job::MathThenYell(math) => {
+//                 let other = get_number(monkeys, &math.other_name);
+//                 let other_2 = get_number(monkeys, &math.other_name_2);
 
-                match math.math {
-                    Operation::Add => other + other_2,
-                    Operation::Multiply => other * other_2,
-                    Operation::Minus => other - other_2,
-                    Operation::Divide => other / other_2,
-                }
-            }
-        },
-    }
-}
+//                 match math.math {
+//                     Operation::Add => other + other_2,
+//                     Operation::Multiply => other * other_2,
+//                     Operation::Minus => other - other_2,
+//                     Operation::Divide => other / other_2,
+//                 }
+//             }
+//         },
+//     }
+// }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let monkeys = input
-        .lines()
-        .map(|line| Monkey::parse_line(line))
-        .collect::<Vec<_>>();
+    let mut monkeys: HashMap<String, Monkey> = HashMap::new();
+    // let monkeys = input
+    //     .lines()
+    //     .map(|line| Monkey::parse_line(line))
+    //     .collect::<Vec<_>>();
+    for line in input.lines() {
+        let monkey = Monkey::parse_line(line);
+        monkeys.insert(monkey.name.clone(), monkey);
+    }
 
     let number = get_number(&monkeys, "root");
 
     Some(number as u64)
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
+pub fn part_two(_input: &str) -> Option<u64> {
     // let mut monkeys = input
     //     .lines()
     //     .map(|line| Monkey::parse_line(line))
