@@ -116,6 +116,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     let other_2 = get_number(&monkeys, &other_2_name);
 
     println!("{} = {} when humn = {}", other, other_2, PART_TWO_ANSWER);
+    println!("Solved equation by hand");
 
     None
 }
