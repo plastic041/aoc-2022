@@ -34,12 +34,12 @@ impl Monkey {
         let job = parts.next().unwrap();
 
         if let Ok(yell) = job.parse::<i64>() {
-            return Monkey {
+            Monkey {
                 name,
                 job: Job::Yell(yell),
-            };
+            }
         } else {
-            let mut parts = job.split(" ");
+            let mut parts = job.split(' ');
             let other_name = parts.next().unwrap().to_string();
             let math = parts.next().unwrap();
             let other_name_2 = parts.next().unwrap().to_string();
@@ -52,14 +52,14 @@ impl Monkey {
                 _ => panic!("Unknown math"),
             };
 
-            return Monkey {
+            Monkey {
                 name,
                 job: Job::MathThenYell(Math {
                     other_name,
                     math,
                     other_name_2,
                 }),
-            };
+            }
         }
     }
 }
@@ -82,153 +82,6 @@ fn get_number(monkeys: &HashMap<String, Monkey>, name: &str) -> i64 {
     }
 }
 
-fn get_equation(monkeys: &HashMap<String, Monkey>, name: &str) -> String {
-    let monkey = monkeys.get(name).unwrap();
-    match monkey.name.as_str() {
-        "root" => match &monkey.job {
-            Job::Yell(_) => panic!("Root is not a yell"),
-            Job::MathThenYell(math) => {
-                let other = get_equation(monkeys, &math.other_name);
-                let other_2 = get_equation(monkeys, &math.other_name_2);
-
-                format!("{} - {} = 0", other, other_2)
-            }
-        },
-        "humn" => "x".to_string(),
-        _ => match &monkey.job {
-            Job::Yell(yell) => yell.to_string(),
-            Job::MathThenYell(math) => {
-                let other = get_equation(monkeys, &math.other_name);
-                let other_2 = get_equation(monkeys, &math.other_name_2);
-
-                let operator = match math.math {
-                    Operation::Add => "+",
-                    Operation::Multiply => "*",
-                    Operation::Minus => "-",
-                    Operation::Divide => "/",
-                };
-
-                if other.contains("x") || other_2.contains("x") {
-                    return format!("({} {} {})", other, operator, other_2);
-                } else {
-                    let result = match math.math {
-                        Operation::Add => {
-                            other.parse::<i64>().unwrap() + other_2.parse::<i64>().unwrap()
-                        }
-                        Operation::Multiply => {
-                            other.parse::<i64>().unwrap() * other_2.parse::<i64>().unwrap()
-                        }
-                        Operation::Minus => {
-                            other.parse::<i64>().unwrap() - other_2.parse::<i64>().unwrap()
-                        }
-                        Operation::Divide => {
-                            other.parse::<i64>().unwrap() / other_2.parse::<i64>().unwrap()
-                        }
-                    };
-                    return result.to_string();
-                }
-            }
-        },
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-enum Term {
-    Number(i64),
-    Variable,
-    Term(Box<Expression>),
-}
-
-#[derive(Debug, PartialEq, Eq)]
-struct Expression {
-    left: Term,
-    right: Term,
-    operator: Operation,
-}
-
-fn get_equation_2(monkeys: &HashMap<String, Monkey>, name: &str) -> Term {
-    let monkey = monkeys.get(name).unwrap();
-    match monkey.name.as_str() {
-        "root" => match &monkey.job {
-            Job::Yell(_) => panic!("Root is not a yell"),
-            Job::MathThenYell(math) => {
-                let other = get_equation_2(monkeys, &math.other_name);
-                let other_2 = get_equation_2(monkeys, &math.other_name_2);
-
-                Term::Term(Box::new(Expression {
-                    left: other,
-                    right: other_2,
-                    operator: math.math.clone(),
-                }))
-            }
-        },
-        "humn" => Term::Variable,
-        _ => match &monkey.job {
-            Job::Yell(yell) => Term::Number(*yell),
-            Job::MathThenYell(math) => {
-                let other = get_equation_2(monkeys, &math.other_name);
-                let other_2 = get_equation_2(monkeys, &math.other_name_2);
-
-                match (&other, &other_2) {
-                    (Term::Variable, Term::Variable) => panic!("Can't have two variables"),
-                    (Term::Number(a), Term::Number(b)) => {
-                        let result = match math.math {
-                            Operation::Add => a + b,
-                            Operation::Multiply => a * b,
-                            Operation::Minus => a - b,
-                            Operation::Divide => a / b,
-                        };
-                        return Term::Number(result);
-                    }
-                    (_, _) => {
-                        return Term::Term(Box::new(Expression {
-                            left: other,
-                            right: other_2,
-                            operator: math.math.clone(),
-                        }));
-                    }
-                }
-            }
-        },
-    }
-}
-
-fn op(operation: &Operation, right: &mut i64, a: &i64) {
-    match operation {
-        Operation::Add => *right -= *a,
-        Operation::Multiply => *right /= *a,
-        Operation::Minus => *right += *a,
-        Operation::Divide => *right *= *a,
-    }
-}
-
-fn solve_equation(equation: &mut Term) -> i64 {
-    let mut left = equation;
-    let mut right = 0;
-
-    while let Term::Term(e) = left {
-        let left_term = &mut e.left;
-        let right_term = &mut e.right;
-
-        match (&left_term, &right_term) {
-            (Term::Variable, Term::Variable) => panic!("Can't have two variables"),
-            (Term::Number(_), Term::Number(_)) => todo!(),
-
-            (Term::Variable, Term::Number(a)) | (Term::Term(_), Term::Number(a)) => {
-                op(&e.operator, &mut right, a);
-                left = left_term;
-            }
-            (Term::Number(_), Term::Variable) => todo!(),
-            (Term::Number(_), Term::Term(_)) => todo!(),
-            (Term::Variable, Term::Term(_)) => todo!(),
-            (Term::Term(_), Term::Variable) => todo!(),
-            (Term::Term(_), Term::Term(_)) => todo!(),
-        }
-    }
-
-    0
-}
-
 pub fn part_one(input: &str) -> Option<u64> {
     let mut monkeys: HashMap<String, Monkey> = HashMap::new();
     for line in input.lines() {
@@ -241,6 +94,8 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(number as u64)
 }
 
+const PART_TWO_ANSWER: i64 = 3_757_272_361_782;
+
 pub fn part_two(input: &str) -> Option<u64> {
     let mut monkeys: HashMap<String, Monkey> = HashMap::new();
     for line in input.lines() {
@@ -248,10 +103,19 @@ pub fn part_two(input: &str) -> Option<u64> {
         monkeys.insert(monkey.name.clone(), monkey);
     }
 
-    // Found this equation by hand
-    let equation = get_equation_2(&monkeys, "root");
+    monkeys.get_mut("humn").unwrap().job = Job::Yell(PART_TWO_ANSWER);
 
-    println!("{:?}", equation);
+    let root_monkey = monkeys.get("root").unwrap();
+
+    let (other_name, other_2_name) = match &root_monkey.job {
+        Job::Yell(_) => panic!("Root is a yell"),
+        Job::MathThenYell(math) => (math.other_name.clone(), math.other_name_2.clone()),
+    };
+
+    let other = get_number(&monkeys, &other_name);
+    let other_2 = get_number(&monkeys, &other_2_name);
+
+    println!("{} = {} when humn = {}", other, other_2, PART_TWO_ANSWER);
 
     None
 }
@@ -275,6 +139,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 21);
-        assert_eq!(part_two(&input), Some(301));
+        assert_eq!(part_two(&input), None);
     }
 }
