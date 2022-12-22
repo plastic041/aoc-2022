@@ -41,15 +41,15 @@ fn parse_commands(input: &str) -> Vec<Command> {
     commands
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
+    Right = 0,
+    Down = 1,
+    Left = 2,
+    Up = 3,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Point {
     x: usize,
     y: usize,
@@ -75,7 +75,8 @@ enum Cell {
 
 impl Map {
     fn width(&self) -> usize {
-        self.cells[0].len()
+        // longest row width
+        self.cells.iter().map(|row| row.len()).max().unwrap()
     }
 
     fn height(&self) -> usize {
@@ -122,11 +123,16 @@ impl Map {
     }
 
     fn get_cell(&self, point: &Point) -> Cell {
-        self.cells[point.y][point.x].clone()
+        // self.cells[point.y][point.x].clone()
+        self.cells
+            .get(point.y)
+            .and_then(|row| row.get(point.x))
+            .cloned()
+            .unwrap_or(Cell::Void)
     }
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<usize> {
     let mut split = input.split("\n\n");
     let map = Map {
         cells: split
@@ -148,7 +154,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     let desc = split.next().unwrap();
 
-    let mut commands = parse_commands(desc);
+    let commands = parse_commands(desc);
 
     let start: Point = Point::new(
         map.cells[0].iter().position(|c| *c == Cell::Open).unwrap(),
@@ -158,20 +164,31 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut current_direction = Direction::Right;
     let mut current_point = start;
 
-    while let Some(command) = commands.iter().next() {
-        match &command {
+    for command in &commands {
+        match command {
             Command::Step(step) => {
                 let mut i: i32 = 0;
-                println!("{:?} {:?}", current_direction, current_point);
-                while i < *step as i32 {
-                    let next_index = map.get_next_point(&current_point, &current_direction);
 
-                    match map.get_cell(&next_index) {
-                        Cell::Open => current_point = next_index,
+                println!("{:?} {:?}, {}", current_direction, current_point, step);
+                while i < *step as i32 {
+                    let next_point = map.get_next_point(&current_point, &current_direction);
+                    let cell = map.get_cell(&next_point);
+
+                    match cell {
+                        Cell::Open => current_point = next_point,
                         Cell::Wall => break,
                         Cell::Void => {
-                            current_point = next_index;
-                            i -= 1;
+                            let mut check = map.get_next_point(&current_point, &current_direction);
+                            while map.get_cell(&check) == Cell::Void {
+                                check = map.get_next_point(&check, &current_direction);
+                            }
+                            match map.get_cell(&check) {
+                                Cell::Open => {
+                                    current_point = check;
+                                }
+                                Cell::Wall => break,
+                                Cell::Void => panic!("unexpected cell"),
+                            }
                         }
                     }
 
@@ -195,13 +212,20 @@ pub fn part_one(input: &str) -> Option<u32> {
                 }
             }
         }
-
-        commands.remove(0);
     }
 
-    dbg!(current_direction, current_point);
+    let row = current_point.y + 1;
+    let column = current_point.x + 1;
+    let answer = (row * 1000) + (column * 4) + current_direction as usize;
+    let point = Point::new(column, row);
+    println!("{:?}", map.get_cell(&point));
 
-    None
+    println!(
+        "row: {}, column: {}, direction: {:?}",
+        row, column, current_direction
+    );
+
+    Some(answer)
 }
 
 pub fn part_two(_input: &str) -> Option<u32> {
