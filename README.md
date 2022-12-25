@@ -4,7 +4,7 @@
 
 [Advent of Code](https://adventofcode.com/) in [Rust](https://www.rust-lang.org/).
 
-## 2022 Results (40 / 49)
+## 2022 Results (40 / 50)
 
 | Day | Part 1 | Part 2 |
 | :---: | :---: | :---: |
